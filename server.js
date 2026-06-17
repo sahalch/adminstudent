@@ -12,15 +12,19 @@ function getStudents() {
         fs.readFileSync("students.json", "utf8")
     );
 }
-function saveStudents(data) {
+function saveStudents(students) {
     fs.writeFileSync(
         "students.json",
-        JSON.stringify(data, null, 2)
+        JSON.stringify(students, null, 2)
     );
 }
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/login.html");
+});
 app.post("/login", (req, res) => {
-    const { userid, password, course } = req.body;
+    const { userid, password, role } = req.body;
     if (
+        role === "admin" &&
         userid === ADMIN.userid &&
         password === ADMIN.password
     ) {
@@ -29,19 +33,20 @@ app.post("/login", (req, res) => {
             role: "admin"
         });
     }
-    let students = getStudents();
-    let student = students.find(
-        s =>
-            s.userid === userid &&
-            s.password === password &&
-            s.course === course
-    );
-    if (student) {
-        return res.json({
-            success: true,
-            role: "student",
-            student
-        });
+    if (role === "student") {
+        let students = getStudents();
+        let student = students.find(
+            s =>
+                s.userid === userid &&
+                s.password === password
+        );
+        if (student) {
+            return res.json({
+                success: true,
+                role: "student",
+                student
+            });
+        }
     }
     res.json({
         success: false
@@ -55,7 +60,7 @@ app.post("/students", (req, res) => {
     students.push(req.body);
     saveStudents(students);
     res.json({
-        message: "Student Added"
+        message: "Added"
     });
 });
 app.put("/students/:id", (req, res) => {
@@ -67,18 +72,13 @@ app.put("/students/:id", (req, res) => {
     });
 });
 app.delete("/students/:id", (req, res) => {
-
     let students = getStudents();
-
     students.splice(req.params.id, 1);
-
     saveStudents(students);
-
     res.json({
         message: "Deleted"
     });
 });
-
 app.listen(3000, () => {
     console.log("Server Running");
 });

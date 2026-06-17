@@ -1,50 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login</title>
+
+<title>Student Management Login</title>
 
 <style>
 
-body{
-    font-family:Arial;
-    text-align:center;
-    margin-top:50px;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
 }
 
-input,select,button{
-    margin:5px;
-    padding:8px;
+body{
+    background:#f0f4f8;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    width:350px;
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 0 15px rgba(0,0,0,0.2);
+    text-align:center;
+}
+
+h1{
+    color:#1e3a8a;
+    margin-bottom:10px;
+}
+
+p{
+    color:gray;
+    margin-bottom:20px;
+}
+
+input,select{
+
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:15px;
+
+}
+
+button{
+
+    width:100%;
+    padding:10px;
+    margin-top:15px;
+    border:none;
+    border-radius:6px;
+    background:#2563eb;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+
+}
+
+button:hover{
+
+    background:#1d4ed8;
+
+}
+
+.footer{
+
+    margin-top:20px;
+    color:gray;
+    font-size:14px;
+
 }
 
 </style>
 
 </head>
+
 <body>
 
-<h2>Login</h2>
+<div class="container">
 
-<input id="userid" placeholder="User ID">
+<h1>Student Management</h1>
 
-<br>
+<p>Login to Continue</p>
+
+<input
+id="userid"
+placeholder="Enter User ID">
 
 <input
 id="password"
 type="password"
-placeholder="Password">
+placeholder="Enter Password">
 
-<br>
-
-<select id="course">
-    <option value="">Select Course</option>
-    <option>MERN Stack</option>
-    <option>Python</option>
+<select id="role">
+    <option value="">Select Role</option>
+    <option value="admin">Admin</option>
+    <option value="student">Student</option>
 </select>
-
-<br>
 
 <button onclick="login()">
 Login
 </button>
+
+<div class="footer">
+
+Mini Student Management System
+
+</div>
+
+</div>
 
 <script>
 
@@ -56,19 +128,32 @@ async function login(){
     let password =
     document.getElementById("password").value;
 
-    let course =
-    document.getElementById("course").value;
+    let role =
+    document.getElementById("role").value;
+
+    if(userid=="" || password=="" || role==""){
+
+        alert("Please fill all fields");
+
+        return;
+    }
 
     let res = await fetch("/login",{
+
         method:"POST",
+
         headers:{
             "Content-Type":"application/json"
         },
+
         body:JSON.stringify({
+
             userid,
             password,
-            course
+            role
+
         })
+
     });
 
     let data = await res.json();
@@ -80,17 +165,22 @@ async function login(){
             data.role
         );
 
-        if(data.role==="student"){
+        if(data.role=="student"){
+
             localStorage.setItem(
                 "student",
                 JSON.stringify(data.student)
             );
+
         }
 
         location.href="dashboard.html";
+
     }
     else{
+
         alert("Invalid Login");
+
     }
 
 }

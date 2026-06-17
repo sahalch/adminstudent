@@ -1,38 +1,148 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
 <title>Dashboard</title>
 
 <style>
 
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
 body{
-    font-family:Arial;
-    padding:20px;
+    background:#eef2f7;
+}
+
+.header{
+    background:#2563eb;
+    color:white;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.header h2{
+    font-size:24px;
 }
 
 #logout{
-    float:right;
+    background:#ef4444;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+#logout:hover{
+    background:#dc2626;
+}
+
+.container{
+    width:90%;
+    max-width:900px;
+    margin:30px auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 0 15px rgba(0,0,0,.15);
 }
 
 input,select{
-    padding:8px;
-    margin:5px;
+
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:1px solid #ccc;
+    border-radius:5px;
+
 }
 
 button{
-    padding:8px;
+
+    padding:10px 18px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+
+}
+
+.saveBtn{
+    background:#2563eb;
+    color:white;
+}
+
+.saveBtn:hover{
+    background:#1d4ed8;
+}
+
+.editBtn{
+    background:#f59e0b;
+    color:white;
+}
+
+.deleteBtn{
+    background:#ef4444;
+    color:white;
+}
+
+ul{
+    list-style:none;
+    margin-top:20px;
+}
+
+li{
+
+    background:#f8fafc;
+    margin:10px 0;
+    padding:12px;
+    border-radius:6px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+}
+
+.card{
+
+    background:#f8fafc;
+    padding:20px;
+    border-radius:8px;
+    margin-top:20px;
+
+}
+
+.card h3{
+    margin:10px 0;
 }
 
 </style>
 
 </head>
+
 <body>
+
+<div class="header">
+
+<h2>Student Management System</h2>
 
 <button id="logout" onclick="logout()">
 Sign Out
 </button>
 
+</div>
+
+<div class="container">
+
 <div id="content"></div>
+
+</div>
 
 <script>
 
@@ -53,63 +163,53 @@ else if(role==="student"){
 else{
     location.href="login.html";
 }
-
 function logout(){
-
     localStorage.clear();
-
     location.href="login.html";
 }
 function adminPage(){
-
-content.innerHTML = `
-
+content.innerHTML=`
 <h2>Admin Panel</h2>
-
+<br>
 <input id="userid"
-placeholder="Student ID">
-
+placeholder="Student User ID">
 <input id="password"
-placeholder="Password">
+placeholder="Student Password">
 
 <select id="course">
-    <option>MERN Stack</option>
-    <option>Python</option>
+
+<option>MERN Stack</option>
+
+<option>Python</option>
+
 </select>
 
-<button onclick="saveStudent()">
-Save
+<button class="saveBtn"
+onclick="saveStudent()">
+
+Save Student
+
 </button>
 
-<h3>Students</h3>
+<h3 style="margin-top:30px;">
+Registered Students
+</h3>
 
 <ul id="list"></ul>
 
 `;
-
 loadStudents();
-
 }
-
 async function saveStudent(){
-
-let userid =
-document.getElementById("userid").value;
-
-let password =
-document.getElementById("password").value;
-
-let course =
-document.getElementById("course").value;
-
-let student = {
-    userid,
-    password,
-    course
+let student={
+userid:
+document.getElementById("userid").value,
+password:
+document.getElementById("password").value,
+course:
+document.getElementById("course").value
 };
-
 if(editId==-1){
-
 await fetch("/students",{
 method:"POST",
 headers:{
@@ -117,10 +217,8 @@ headers:{
 },
 body:JSON.stringify(student)
 });
-
 }
 else{
-
 await fetch("/students/"+editId,{
 method:"PUT",
 headers:{
@@ -128,101 +226,71 @@ headers:{
 },
 body:JSON.stringify(student)
 });
-
 editId=-1;
 }
-
+document.getElementById("userid").value="";
+document.getElementById("password").value="";
 loadStudents();
-
 }
-
 async function loadStudents(){
-
-let res =
+let res=
 await fetch("/students");
-
-let students =
+let students=
 await res.json();
-
-let list = "";
-
+window.students=students;
+let list="";
 students.forEach((s,index)=>{
-
-list += `
-
+list+=`
 <li>
-
-${s.userid}
-|
+<div>
+<b>${s.userid}</b>
+<br>
 ${s.course}
-
-<button onclick="editStudent(${index})">
+</div>
+<div>
+<button class="editBtn"
+onclick="editStudent(${index})">
 Edit
 </button>
-
-<button onclick="deleteStudent(${index})">
+<button class="deleteBtn"
+onclick="deleteStudent(${index})">
 Delete
 </button>
-
+</div>
 </li>
-
 `;
-
 });
-
-document.getElementById("list").innerHTML =
-list;
-
-window.students = students;
-
+document.getElementById("list").innerHTML=list;
 }
-
 function editStudent(id){
-
 editId=id;
-
-document.getElementById("userid").value =
+document.getElementById("userid").value=
 students[id].userid;
-
-document.getElementById("password").value =
+document.getElementById("password").value=
 students[id].password;
-
-document.getElementById("course").value =
+document.getElementById("course").value=
 students[id].course;
-
 }
-
 async function deleteStudent(id){
-
 await fetch("/students/"+id,{
 method:"DELETE"
 });
-
 loadStudents();
-
 }
 function studentPage(){
-
-let student =
+let student=
 JSON.parse(
 localStorage.getItem("student")
 );
-
-content.innerHTML = `
-
+content.innerHTML=`
 <h2>Student Dashboard</h2>
-
-<h3>User ID :
-${student.userid}</h3>
-
-<h3>Course :
-${student.course}</h3>
-
+<div class="card">
+<h3>User ID : ${student.userid}</h3>
+<h3>Course : ${student.course}</h3>
+</div>
 `;
-
 }
-
 </script>
-
 </body>
 </html>
+
